@@ -45,6 +45,9 @@ public class UserProvisionSCIMWithDifferentContentTypeTestCase extends ScenarioT
     private String responseMessage;
     private String scimUsersEndpoint;
     private final String SEPERATOR = "/";
+    private final String CONTETY_TYPE ="application/xml";
+
+    HttpResponse response;
 
     @BeforeClass(alwaysRun = true)
     public void testInit() throws Exception {
@@ -68,14 +71,14 @@ public class UserProvisionSCIMWithDifferentContentTypeTestCase extends ScenarioT
         rootObject.put(SCIMConstants.USER_NAME_ATTRIBUTE, SCIMConstants.USERNAME);
         rootObject.put(SCIMConstants.PASSWORD_ATTRIBUTE, SCIMConstants.PASSWORD);
 
-        HttpResponse response = sendPostRequestWithJSON(client, scimUsersEndpoint, rootObject,
+        response = sendPostRequestWithJSON(client, scimUsersEndpoint, rootObject,
                 new Header[]{getBasicAuthzHeader(), getContentTypeApplicationXMLHeader()});
 
         assertEquals(response.getStatusLine().getStatusCode(), HttpStatus.SC_NOT_ACCEPTABLE, "User has not been created successfully");
         JSONObject responseObj = getJSONFromResponse(response);
         responseMessage = responseObj.toJSONString();
 
-        assertEquals(responseMessage,"{\"Errors\":[{\"code\":\"406\",\"description\":\"Requested format is not supported.\"}]}");
+        assertEquals(response.getStatusLine().getReasonPhrase(), "Not Acceptable");
     }
 
     private Header getBasicAuthzHeader() {
@@ -85,6 +88,6 @@ public class UserProvisionSCIMWithDifferentContentTypeTestCase extends ScenarioT
 
     private Header getContentTypeApplicationXMLHeader() {
 
-        return new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/xml");
+        return new BasicHeader(HttpHeaders.CONTENT_TYPE,CONTETY_TYPE );
     }
 }
